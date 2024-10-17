@@ -9,12 +9,13 @@ public class Cache {
     // private final int DEFAULT_ASSOCIATIVITY = 2; 
 
     private ArrayList<CacheSet> cache;
-    int cacheSize; 
-    int blockSize;  // in bytes
-    int associativity;  
+    private int cacheSize; 
+    private int blockSize;  // in bytes
+    private int associativity;  
+    private int numberOfCacheSets; 
 
     // Cache() { 
-    //     int numberOfCacheBlocks = CACHE_SIZE_IN_BYTES/DEFAULT_BLOCK_SIZE_IN_BYTES;
+    //    int numberOfCacheBlocks = CACHE_SIZE_IN_BYTES/DEFAULT_BLOCK_SIZE_IN_BYTES;
     //     this.cache = new CacheBlock[numberOfCacheBlocks];
     //     for (int i = 0; i < cache.length; i++) {
     //         cache[i] = new CacheBlock();
@@ -22,52 +23,33 @@ public class Cache {
     //     this.wordSize = DEFAULT_WORD_SIZE_IN_BYTES; 
     //     this.blockSize = DEFAULT_BLOCK_SIZE_IN_BYTES;
     //     this.associativity = DEFAULT_ASSOCIATIVITY;
-    // }
+    // }/ 
 
     Cache(int cacheSize, int blockSize, int associativity) { 
         this.cacheSize = cacheSize; 
         this.blockSize = blockSize; 
         this.associativity = associativity;
-        int numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
+        this.numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
         
         for (int i = 0; i < numberOfCacheSets; i++) {
             this.cache.add(new CacheSet(this.associativity));
         }
     }
 
-    private void accessCache(int address, boolean isWrite) {
-        int index = (address / blockSize) % cache.length;
-        int tag = address / (cacheSize / cache.length);
-        CacheBlock block = cache[index];
 
-        if (block.valid && block.tag == tag) {
-            // Cache hit scenarios
-            switch (block.state) {
-                case MODIFIED:
-                case EXCLUSIVE:
-                    if (isWrite) {
-                        block.state = State.MODIFIED;
-                    }
-                    System.out.println("Cache hit: " + block.state);
-                    break;
-                case SHARED:
-                    if (isWrite) {
-                        block.state = State.MODIFIED;
-                        invalidateOthers(index);
-                    }
-                    System.out.println("Cache hit: Shared to " + block.state);
-                    break;
-            }
-        } else {
-            // Cache miss scenarios
-            if (block.valid && block.state == State.MODIFIED) {
-                // Write back if dirty
-                memory.writeBackToMemory(block.tag);
-            }
-            block.tag = tag;
-            block.valid = true;
-            block.state = isWrite ? State.MODIFIED : State.EXCLUSIVE;
-            System.out.println("Cache miss - loading block, new state: " + block.state);
-        }
+    // convert memory address to cache-specific address 
+    public void parseMemoryAddress(int address) { 
+        int blockNumber = address / this.blockSize; 
+        int blockOffset = address % this.blockSize; 
+        int setIndex = blockNumber % this.numberOfCacheSets; 
+        int tag = blockNumber / this.numberOfCacheSets;
+        // Optionally print out the results for verification
+        System.out.println("Block Number: " + blockNumber);
+        System.out.println("Block Offset: " + blockOffset);
+        System.out.println("Set Index: " + setIndex);
+        System.out.println("Tag: " + tag);
     }
+
+    
+
 }
