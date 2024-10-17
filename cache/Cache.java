@@ -38,7 +38,7 @@ public class Cache {
 
 
     // convert memory address to cache-specific address 
-    public void parseMemoryAddress(int address) { 
+    public CacheAddress parseMemoryAddress(int address) { 
         int blockNumber = address / this.blockSize; 
         int blockOffset = address % this.blockSize; 
         int setIndex = blockNumber % this.numberOfCacheSets; 
@@ -48,8 +48,17 @@ public class Cache {
         System.out.println("Block Offset: " + blockOffset);
         System.out.println("Set Index: " + setIndex);
         System.out.println("Tag: " + tag);
+
+        return new CacheAddress(blockNumber, blockOffset, setIndex, tag);
     }
 
-    
+    public int readToAddress(int address) { 
+        CacheAddress addressToRead = this.parseMemoryAddress(address);
+
+    }
+
+    public int writeToAddress(int address) { 
+        CacheAddress addressToWrite = this.parseMemoryAddress(address);
+    }
 
 }

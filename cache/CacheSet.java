@@ -13,4 +13,16 @@ public class CacheSet {
             blocks.add(new CacheBlock());
         }
     }
+
+    /* Need to implement: 
+        Hit/Miss detection
+        Data Loading and eviction on cache misses 
+        Dirty bit management 
+    */ 
+
+    public int readBlock(int tag) {
+        for(CacheBlock block : blocks) { 
+            
+        }
+    }
 }
