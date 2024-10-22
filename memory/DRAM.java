@@ -1,7 +1,7 @@
 package memory;
 
-public class DRAM {
-    package memory;
+// public class DRAM {
+//     package memory;
 
 import java.util.HashMap;
 
@@ -55,4 +55,4 @@ public class DRAM {
     }
 }
 
-}
+// }
