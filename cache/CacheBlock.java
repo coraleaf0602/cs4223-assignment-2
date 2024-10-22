@@ -1,7 +1,5 @@
 package cache;
 
-import cache.*;
-
 public class CacheBlock {
     private int tag;
     private boolean valid;

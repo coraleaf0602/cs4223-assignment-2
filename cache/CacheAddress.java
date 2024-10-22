@@ -31,16 +31,6 @@ public class CacheAddress {
         return tag;
     }
 
-    public static CacheAddress parseMemoryAddress(int address, int blockSize, int numberOfCacheSets) {
-
-        int blockNumber = address / blockSize;
-        int blockOffset = address % blockSize;
-        int setIndex = blockNumber % numberOfCacheSets;
-        int tag = blockNumber / numberOfCacheSets;
-
-        return new CacheAddress(blockNumber, blockOffset, setIndex, tag);
-    }
-
     // Override toString for debugging or logging
     @Override
     public String toString() {

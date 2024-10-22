@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "SingleCore",
+            "request": "launch",
+            "mainClass": "SingleCore",
+            "projectName": "cs4223-assignment-2_38d87ce9",
+            "args": "coherence MESI Benchmarks/blackscholes_four/blackscholes_0.data 1024 1 16"
+        }
+    ]
+}
