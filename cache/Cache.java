@@ -2,6 +2,9 @@ package cache;
 
 import java.util.ArrayList;
 
+import bus.Bus;
+import memory.DRAM;
+
 public class Cache {
 
     private ArrayList<CacheSet> cache;
@@ -9,18 +12,27 @@ public class Cache {
     private int blockSize; // in bytes
     private int associativity;
     private int numberOfCacheSets;
+    // for the outputs
+    private DRAM dram;
+    private Bus bus;
 
-    public Cache(int cacheSize, int blockSize, int associativity) {
-        //debug line
+    public Cache(int cacheSize, int blockSize, int associativity, DRAM dram, Bus bus) {
+        // debug line
         System.out.println("Initialising Cache...");
 
+        cache = new ArrayList<>();
+        this.dram = dram;
+        this.bus = bus;
         this.cacheSize = cacheSize;
         this.blockSize = blockSize;
         this.associativity = associativity;
+        System.out.println(cacheSize);
+        System.out.println(blockSize);
+        System.out.println(associativity);
         this.numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
 
         for (int i = 0; i < numberOfCacheSets; i++) {
-            System.out.println("Test");
+            System.out.println("Initialising Cache set...");
             this.cache.add(new CacheSet(this.associativity));
         }
     }
@@ -52,10 +64,12 @@ public class Cache {
         } else {
             // Cache miss
             System.out.println("Cache miss. Fetching from memory...");
-            // Fetch from memory (for now just simulate with a value)
-            int data = fetchFromMemory(address);
-            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), data));
-            return data;
+            // Fetch block from DRAM
+            byte[] memoryBlock = dram.readBlock(address);
+            bus.sendDataToCache(32); // Simulate 32 bytes transferred over the bus
+            int fetchedData = convertByteArrayToInt(memoryBlock, addressToRead.getBlockOffset());
+            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), fetchedData));
+            return fetchedData;
         }
     }
 
@@ -97,5 +111,10 @@ public class Cache {
     private int fetchFromMemory(int address) {
         // need to do this
         return 0;
+    }
+
+    // Helper method to convert bytes from DRAM to int
+    private int convertByteArrayToInt(byte[] byteArray, int offset) {
+        return byteArray[offset]; // Simplified for demonstration (adjust as needed)
     }
 }

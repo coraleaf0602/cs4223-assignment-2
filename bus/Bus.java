@@ -5,13 +5,15 @@ public class Bus{
 
     private int dataTraffic = 0;  // Bytes transferred on the bus
 
-    void sendDataToCache(int bytes) {
+    public void sendDataToCache(int bytes) {
         dataTraffic += bytes;
         System.out.println("Data traffic increased by " + bytes + " bytes.");
     }
 
-    int getDataTraffic() {
-        return dataTraffic;
+    public int getDataTraffic() {
+
+        System.out.println("Need to implement this...");
+        return this.dataTraffic;
     }
 
     void registerCache(){

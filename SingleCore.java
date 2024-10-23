@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import bus.Bus;
 import cache.*;
+import cpu.CPU;
 import memory.DRAM;
 
 public class SingleCore {
@@ -34,9 +35,10 @@ public class SingleCore {
         int associativity;
         int blockSize;
 
-        Cache cache = new Cache(4096, 32, 2);  // 4KB cache, 32 byte block size, 2-way set associative
         DRAM dram = new DRAM(10, 100);
         Bus bus = new Bus();
+        Cache cache;
+        CPU cpu;
 
         System.out.println(args.length);
         for (String s : args) {
@@ -49,11 +51,15 @@ public class SingleCore {
             cacheSize = Integer.parseInt(args[2]);
             associativity = Integer.parseInt(args[3]);
             blockSize = Integer.parseInt(args[4]);
-            String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
 
+            cache = new Cache(cacheSize, blockSize, associativity, dram, bus);
+            cpu = new CPU(cache);
+
+
+            // file mangagement
+            String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
             // this can be bodytrack_four or fluidanimate_four
             String benchmarkFolder = "Benchmarks/blackscholes_four/";
-
             // this can be changed into a for loop
             String filePath = benchmarkFolder + inputFile + extensions[0];
             File testFile = new File(filePath);
@@ -63,9 +69,14 @@ public class SingleCore {
                 while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
                     // Use to count the stats as well
-                    System.out.println(data);
+                    // System.out.println(data);
+                    cpu.executeInstruction(data);
                 }
                 myReader.close();
+                System.out.println("===== Simulation Results =====");
+                cpu.reportStats();  // Report CPU statistics
+                System.out.println("Bus data traffic: " + bus.getDataTraffic() + " bytes");
+                
             } catch (FileNotFoundException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
