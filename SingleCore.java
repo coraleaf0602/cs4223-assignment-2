@@ -2,6 +2,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import bus.Bus;
+import cache.*;
+import memory.DRAM;
+
 public class SingleCore {
     /*
      * 1. Overall Execution Cycle (different core will complete at different cycles;
@@ -29,6 +33,11 @@ public class SingleCore {
         int cacheSize;
         int associativity;
         int blockSize;
+
+        Cache cache = new Cache(4096, 32, 2);  // 4KB cache, 32 byte block size, 2-way set associative
+        DRAM dram = new DRAM(10, 100);
+        Bus bus = new Bus();
+
         System.out.println(args.length);
         for (String s : args) {
             System.out.println(s);
