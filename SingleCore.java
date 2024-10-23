@@ -30,7 +30,7 @@ public class SingleCore {
         int associativity;
         int blockSize;
         System.out.println(args.length);
-        for (String s : args){
+        for (String s : args) {
             System.out.println(s);
         }
         // Types of instructions
@@ -40,9 +40,17 @@ public class SingleCore {
             cacheSize = Integer.parseInt(args[2]);
             associativity = Integer.parseInt(args[3]);
             blockSize = Integer.parseInt(args[4]);
+            String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
+
+            // this can be bodytrack_four or fluidanimate_four
+            String benchmarkFolder = "Benchmarks/blackscholes_four/";
+
+            // this can be changed into a for loop
+            String filePath = benchmarkFolder + inputFile + extensions[0];
+            File testFile = new File(filePath);
 
             try {
-                Scanner myReader = new Scanner(inputFile);
+                Scanner myReader = new Scanner(testFile);
                 while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
                     // Use to count the stats as well
@@ -59,3 +67,5 @@ public class SingleCore {
 
     }
 }
+
+// coherence MESI blackscholes 1024 1 16
