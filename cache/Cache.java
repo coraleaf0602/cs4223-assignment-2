@@ -20,6 +20,7 @@ public class Cache {
         this.numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
 
         for (int i = 0; i < numberOfCacheSets; i++) {
+            System.out.println("Test");
             this.cache.add(new CacheSet(this.associativity));
         }
     }

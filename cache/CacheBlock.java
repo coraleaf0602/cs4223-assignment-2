@@ -13,6 +13,7 @@ public class CacheBlock {
 
     // constructor
     public CacheBlock() {
+        System.out.println("Initialising Cache Blocks");
         this.valid = false;
         this.state = CacheState.INVALID;
         this.data = new int[DEFAULT_BLOCK_WORDS];

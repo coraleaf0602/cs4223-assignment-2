@@ -8,6 +8,7 @@ public class CacheSet {
 
     // Constructor
     public CacheSet(int associativity) {
+        System.out.println("Initialising Cache Set...");
         this.associativity = associativity;
         this.blocks = new ArrayList<>();
 
