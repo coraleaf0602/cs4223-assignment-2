@@ -11,6 +11,9 @@ public class Cache {
     private int numberOfCacheSets;
 
     public Cache(int cacheSize, int blockSize, int associativity) {
+        //debug line
+        System.out.println("Initialising Cache...");
+
         this.cacheSize = cacheSize;
         this.blockSize = blockSize;
         this.associativity = associativity;

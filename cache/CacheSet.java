@@ -12,7 +12,7 @@ public class CacheSet {
         this.blocks = new ArrayList<>();
 
         // Initialize the cache blocks based on associativity
-        for (int i = 0; i < associativity; i++) {
+        for (int i = 0; i < this.associativity; i++) {
             blocks.add(new CacheBlock());
         }
     }

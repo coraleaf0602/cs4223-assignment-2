@@ -29,15 +29,15 @@ public class CacheBlock {
 
     // Getters
     public int getTag() {
-        return tag;
+        return this.tag;
     }
 
     public boolean isValid() {
-        return valid;
+        return this.valid;
     }
 
     public CacheState getState() {
-        return state;
+        return this.state;
     }
 
     // Setters
