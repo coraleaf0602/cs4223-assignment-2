@@ -67,7 +67,7 @@ public class SingleCore {
                 while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
                     // Use to count the stats as well
-                    // System.out.println(data);
+                    System.out.println(data);
                     cpu.executeInstruction(data);
                 }
                 myReader.close();

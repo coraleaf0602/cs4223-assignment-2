@@ -51,7 +51,7 @@ public class Cache {
         return new CacheAddress(blockNumber, blockOffset, setIndex, tag);
     }
 
-    public int readToAddress(int address) {
+    public boolean readToAddress(int address) {
         CacheAddress addressToRead = this.parseMemoryAddress(address);
         CacheSet cacheSet = cache.get(addressToRead.getSetIndex());
         CacheBlock block = cacheSet.getBlockByTag(addressToRead.getTag());
@@ -59,18 +59,19 @@ public class Cache {
         if (block != null) {
             // Cache hit
             System.out.println("Cache hit!");
-            return block.read(addressToRead.getBlockOffset());
+            return true; // Indicate hit
         } else {
             // Cache miss
             System.out.println("Cache miss. Fetching from memory...");
             // Fetch block from DRAM
-            byte[] memoryBlock = dram.readBlock(address);
+            // byte[] memoryBlock = dram.readBlock(address);
             bus.sendDataToCache(32); // Simulate 32 bytes transferred over the bus
-            int fetchedData = convertByteArrayToInt(memoryBlock, addressToRead.getBlockOffset());
-            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), fetchedData, blockSize));
-            return fetchedData;
+            // int fetchedData = convertByteArrayToInt(memoryBlock, addressToRead.getBlockOffset());
+            // cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), fetchedData, blockSize));
+            return false; // Indicate miss
         }
     }
+
 
     public int writeToAddress(int address, int data) {
         // Step 1: Parse the memory address to get the cache-specific information

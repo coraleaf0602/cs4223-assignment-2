@@ -26,7 +26,7 @@ public class DRAM {
      * @return The data block.
      */
     public byte[] readBlock(int address) {
-        simulateDelay(); // Simulate DRAM access delay
+        // simulateDelay(); // Simulate DRAM access delay
         return memory.getOrDefault(address, new byte[BLOCK_SIZE]); // Return the block or an empty block if not present
     }
 
@@ -37,7 +37,7 @@ public class DRAM {
      */
     public void writeBlock(int address, byte[] data) {
         assert data.length == BLOCK_SIZE; // Ensure that the data block size is consistent
-        simulateDelay(); // Simulate DRAM access delay
+        // simulateDelay(); // Simulate DRAM access delay
         memory.put(address, data); // Store the data in the memory
     }
 

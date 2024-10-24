@@ -6,6 +6,10 @@ public class CPU {
     private Cache cache;
     private int computeCycles = 0;
     private int idleCycles = 0;
+    private int loadInstructions = 0;
+    private int storeInstructions = 0;
+    private int cacheHits = 0;
+    private int cacheMisses = 0;
 
     public CPU(Cache cache) {
         this.cache = cache;
@@ -18,12 +22,20 @@ public class CPU {
 
         if (type == 0) {
             // Load instruction
-            cache.readToAddress(address);
-            this.idleCycles += 100; // Add DRAM latency
-            // if this is a cache miss then cycles + 100, otherwise then cycles is +1 only 
+            loadInstructions++;
+            boolean hit = cache.readToAddress(address);
+            if (!hit) {
+                cacheMisses++;
+                this.idleCycles += 100; // Add DRAM latency on cache miss
+            } else {
+                cacheHits++;
+                this.idleCycles += 1; // Only add 1 cycle on cache hit
+            }
         } else if (type == 1) {
             // Store instruction
+            storeInstructions++;
             cache.writeToAddress(address, 99); // Write dummy data
+            cacheHits++; // Assuming store always hits the cache
         } else if (type == 2) {
             // Compute cycles
             this.computeCycles += address;
@@ -31,13 +43,14 @@ public class CPU {
     }
 
     public void reportStats() {
-        System.out.println("Compute cycles: " + computeCycles);
-        System.out.println("Idle cycles: " + idleCycles);
-        System.out.println("Other data needs to be computed too...");
-        // System.out.println("Load/Store instructions: " + loadStoreInstructions);
-        // System.out.println("Cache hits: " + cacheHits);
-        // System.out.println("Cache misses: " + cacheMisses);
-        // System.out.println("Total instructions: " + (computeCycles + idleCycles +
-        // loadStoreInstructions));
+        System.out.println("Finished at cycle " + (computeCycles + idleCycles));
+        System.out.println("Compute Cycles Number is " + computeCycles);
+        System.out.println("Load Number: " + loadInstructions + " Store Number: " + storeInstructions);
+        System.out.println("Idle Cycles Number is " + idleCycles);
+        
+        // Calculate Cache Miss Rate
+        int totalLoads = loadInstructions + storeInstructions; // Total load/store attempts
+        double cacheMissRate = (double) cacheMisses / totalLoads * 100; // Cache miss rate percentage
+        System.out.printf("Data Cache Miss Rate: %.0f%%\n", cacheMissRate);
     }
 }
