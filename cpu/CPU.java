@@ -20,6 +20,7 @@ public class CPU {
             // Load instruction
             cache.readToAddress(address);
             this.idleCycles += 100; // Add DRAM latency
+            // if this is a cache miss then cycles + 100, otherwise then cycles is +1 only 
         } else if (type == 1) {
             // Store instruction
             cache.writeToAddress(address, 99); // Write dummy data

@@ -45,27 +45,27 @@ public class SingleCore {
             System.out.println(s);
         }
         // Types of instructions
-        if (args.length == 5) {
-            protocol = args[0];
-            inputFile = new File(args[1]);
-            cacheSize = Integer.parseInt(args[2]);
-            associativity = Integer.parseInt(args[3]);
-            blockSize = Integer.parseInt(args[4]);
+        if (args.length == 6) {
+            protocol = args[0] + args[1];
+            inputFile = new File(args[2]);
+            cacheSize = Integer.parseInt(args[3]);
+            associativity = Integer.parseInt(args[4]);
+            blockSize = Integer.parseInt(args[5]);
 
             cache = new Cache(cacheSize, blockSize, associativity, dram, bus);
             cpu = new CPU(cache);
 
 
-            // file mangagement
-            String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
-            // this can be bodytrack_four or fluidanimate_four
-            String benchmarkFolder = "Benchmarks/blackscholes_four/";
-            // this can be changed into a for loop
-            String filePath = benchmarkFolder + inputFile + extensions[0];
-            File testFile = new File(filePath);
+            // // file mangagement
+            // String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
+            // // this can be bodytrack_four or fluidanimate_four
+            // String benchmarkFolder = "Benchmarks/blackscholes_four/";
+            // // this can be changed into a for loop
+            // String filePath = benchmarkFolder + inputFile + extensions[0];
+            // File testFile = new File(filePath);
 
             try {
-                Scanner myReader = new Scanner(testFile);
+                Scanner myReader = new Scanner(inputFile);
                 while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
                     // Use to count the stats as well

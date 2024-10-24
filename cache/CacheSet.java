@@ -7,14 +7,14 @@ public class CacheSet {
     private int associativity;  // Number of blocks in this set (associativity)
 
     // Constructor
-    public CacheSet(int associativity) {
+    public CacheSet(int associativity, int blockSize) {
         System.out.println("Initialising Cache Set...");
         this.associativity = associativity;
         this.blocks = new ArrayList<>();
 
         // Initialize the cache blocks based on associativity
         for (int i = 0; i < this.associativity; i++) {
-            blocks.add(new CacheBlock());
+            blocks.add(new CacheBlock(blockSize));
         }
     }
 

@@ -32,8 +32,7 @@ public class Cache {
         this.numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
 
         for (int i = 0; i < numberOfCacheSets; i++) {
-            System.out.println("Initialising Cache set...");
-            this.cache.add(new CacheSet(this.associativity));
+            this.cache.add(new CacheSet(this.associativity, this.blockSize));
         }
     }
 
@@ -68,7 +67,7 @@ public class Cache {
             byte[] memoryBlock = dram.readBlock(address);
             bus.sendDataToCache(32); // Simulate 32 bytes transferred over the bus
             int fetchedData = convertByteArrayToInt(memoryBlock, addressToRead.getBlockOffset());
-            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), fetchedData));
+            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), fetchedData, blockSize));
             return fetchedData;
         }
     }
@@ -96,7 +95,7 @@ public class Cache {
             int fetchedData = fetchFromMemory(address);
 
             // Create a new cache block with the fetched data and the given tag
-            CacheBlock newBlock = new CacheBlock(addressToWrite.getTag(), fetchedData);
+            CacheBlock newBlock = new CacheBlock(addressToWrite.getTag(), fetchedData, blockSize);
 
             // Insert the new block into the cache set
             cacheSet.insertBlock(newBlock);
