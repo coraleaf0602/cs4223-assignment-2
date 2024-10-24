@@ -16,23 +16,23 @@ public class Bus{
         return this.dataTraffic;
     }
 
-    void registerCache(){
+    // void registerCache(){
 
-    }
+    // }
 
-    void sendRequest(Message msg){
+    // void sendRequest(Message msg){
 
-    }
+    // }
 
-    void reply(Message msg){
+    // void reply(Message msg){
 
-    }
+    // }
 
-    void propagationRequests(){
+    // void propagationRequests(){
 
-    }
+    // }
 
-    void propagationReply(){
+    // void propagationReply(){
 
-    }
+    // }
 }
