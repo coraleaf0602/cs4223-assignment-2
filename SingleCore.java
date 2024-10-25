@@ -37,7 +37,7 @@ public class SingleCore {
             // file mangagement
             String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
             // this can be bodytrack_four or fluidanimate_four
-            String benchmarkFolder = "Benchmarks/blackscholes_four/";
+            String benchmarkFolder = "Benchmarks/" + args[1] + "_four/";
             // this can be changed into a for loop
             String filePath = benchmarkFolder + args[1] + extensions[0];
             inputFile = new File(filePath);
