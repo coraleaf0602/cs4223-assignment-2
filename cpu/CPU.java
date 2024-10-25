@@ -10,6 +10,9 @@ public class CPU {
     private int storeInstructions = 0;
     private int cacheHits = 0;
     private int cacheMisses = 0;
+    private int dramLatency = 100;
+    private int cacheHitLatency = 1; 
+    private int DUMMY_DATA = 99;
 
     public CPU(Cache cache) {
         this.cache = cache;
@@ -26,16 +29,24 @@ public class CPU {
             boolean hit = cache.readToAddress(address);
             if (!hit) {
                 cacheMisses++;
-                this.idleCycles += 100; // Add DRAM latency on cache miss
+                this.idleCycles += dramLatency; // Add DRAM latency on cache miss
             } else {
                 cacheHits++;
-                this.idleCycles += 1; // Only add 1 cycle on cache hit
+                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
             }
         } else if (type == 1) {
             // Store instruction
             storeInstructions++;
-            cache.writeToAddress(address, 99); // Write dummy data
-            cacheHits++; // Assuming store always hits the cache
+            int hit = cache.writeToAddress(address, DUMMY_DATA); 
+            if(hit == 1 || hit == 2) { 
+                cacheMisses++; 
+                // Need to know if DRAM latency was called 
+                if(hit == 2) { 
+                    this.idleCycles += dramLatency;
+                }
+            } else { 
+                cacheHits++; // Assuming store always hits the cache
+            }
         } else if (type == 2) {
             // Compute cycles
             this.computeCycles += address;
@@ -43,14 +54,38 @@ public class CPU {
     }
 
     public void reportStats() {
-        System.out.println("Finished at cycle " + (computeCycles + idleCycles));
-        System.out.println("Compute Cycles Number is " + computeCycles);
+        /*
+         * 1. Overall Execution Cycle (different core will complete at different cycles;
+         * report the maximum value across all cores) for the entire trace as well as
+         * execution cycle per core 
+         */
+        System.out.println("Overall Execution Cycle: " + (idleCycles + computeCycles)); 
+        /* 
+         * 2. Number of compute cycles per core. These are the total number of cycles
+         * spent processing other instructions between load/store instructions
+         */
+        System.out.println("Number of Compute Cycles: " + computeCycles);
+        /* 
+         * 3. Number of load/store instructions per core
+         */
         System.out.println("Load Number: " + loadInstructions + " Store Number: " + storeInstructions);
-        System.out.println("Idle Cycles Number is " + idleCycles);
-        
+        /* 
+         * 4. Number of idle cycles (these are cycles where the core is waiting for the
+         * request to the cache to be completed) per core
+         */
+        System.out.println("Number of Idle Cycles:" + idleCycles);
+        /* 
+         * 5. Data cache hit and miss counts for each core
+         */
         // Calculate Cache Miss Rate
         int totalLoads = loadInstructions + storeInstructions; // Total load/store attempts
         double cacheMissRate = (double) cacheMisses / totalLoads * 100; // Cache miss rate percentage
+        System.out.println("Number of Data Cache Miss Count: " + cacheMisses);
         System.out.printf("Data Cache Miss Rate: %.0f%%\n", cacheMissRate);
-    }
+
+        // Calculate Cache Hit Rate 
+        double cacheHitRate = (double) cacheHits / totalLoads * 100; // Convert to percentage 
+        System.out.println("Number of Data Cache Hit Count: " + cacheHits); 
+        System.out.printf("Data Cache Hit Rate: %.0f%%\n", cacheHitRate); 
+    } 
 }

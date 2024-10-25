@@ -16,7 +16,7 @@
             "request": "launch",
             "mainClass": "SingleCore",
             "projectName": "cs4223-assignment-2_38d87ce9",
-            "args": "coherence MESI Benchmarks/blackscholes_four/blackscholes_0.data 1024 1 16"
+            "args": "MESI blackscholes 1024 1 16"
         }
     ]
 }

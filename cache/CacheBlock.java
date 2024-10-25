@@ -2,10 +2,9 @@ package cache;
 
 public class CacheBlock {
     private int tag;
-    private boolean valid;
-    private CacheState state;
+    private boolean isValid;
+    private boolean isDirty; 
     private int[] data; // Simulate the block's data (array of words)
-
 
     // Default Block Size: 32 bytes
     // size of word = 4 bytes
@@ -16,16 +15,16 @@ public class CacheBlock {
     // Default constructor 
     public CacheBlock() {
         System.out.println("Initialising Cache Blocks");
-        this.valid = false;
-        this.state = CacheState.INVALID;
+        this.isValid = false;
+        this.isDirty = false;
         this.data = new int[DEFAULT_BLOCK_WORDS];
     }
 
     // Constructor that takes in Block size 
     public CacheBlock(int blockSize) { 
         System.out.println("Initialising Cache Blocks of size " + blockSize + " bytes"); 
-        this.valid = false; 
-        this.state = CacheState.INVALID; 
+        this.isValid = false; 
+        this.isDirty = false ; 
         this.data = new int[blockSize/DEFAULT_WORD_SIZE]; 
     }
 
@@ -33,8 +32,8 @@ public class CacheBlock {
     public CacheBlock(int tag, int data, int blockSize) {
         this(blockSize);
         this.tag = tag;
-        this.valid = true;
-        this.state = CacheState.MODIFIED; // Assuming modified state upon write
+        this.isValid = true;
+        this.isDirty = false; // Assuming modified state upon write
         this.data[0] = data; // Store data in the first word (can be extended)
     }
 
@@ -44,11 +43,15 @@ public class CacheBlock {
     }
 
     public boolean isValid() {
-        return this.valid;
+        return this.isValid;
     }
 
-    public CacheState getState() {
-        return this.state;
+    public boolean isDirty() {
+        return this.isDirty;
+    }
+
+    public int[] getData() { 
+        return this.data;
     }
 
     // Setters
@@ -56,32 +59,34 @@ public class CacheBlock {
         this.tag = tag;
     }
 
-    public void setValid(boolean valid) {
-        this.valid = valid;
+    public void setValid(boolean isValid) {
+        this.isValid = isValid;
     }
 
-    public void setState(CacheState state) {
-        this.state = state;
+    public void setDirty(boolean isDirty) {
+        this.isDirty = isDirty;
     }
 
-    // Read data from the block at a specific word offset
+    public void setData(int[] data) { 
+        this.data = data; 
+    }
+
+    // Read data from the block
     public int read(int offset) {
-        //Converts offset from byte size to word size 
-        offset = offset/DEFAULT_WORD_SIZE;
-        if (valid) {
-            return data[offset]; // Return the word at the given offset
+        if (isValid) {
+            offset /= DEFAULT_WORD_SIZE; // Convert byte offset to word index
+            return data[offset];
         } else {
             throw new IllegalStateException("Cache block is not valid!");
         }
     }
 
-    // Write data to the block at a specific word offset
+    // Write data to the block
     public void write(int offset, int value) {
-        //Converts offset from byte size to word size 
-        offset = offset/DEFAULT_WORD_SIZE;
-        if (valid) {
+        if (isValid) {
+            offset /= DEFAULT_WORD_SIZE; // Convert byte offset to word index
             data[offset] = value;
-            this.state = CacheState.MODIFIED; // Assume write leads to MODIFIED state
+            this.isDirty = true; // Mark block as dirty since it has been modified
         } else {
             throw new IllegalStateException("Cache block is not valid!");
         }
@@ -90,6 +95,6 @@ public class CacheBlock {
     // Override toString for debugging
     @Override
     public String toString() {
-        return "CacheBlock [tag=" + tag + ", valid=" + valid + ", state=" + state + "]";
+        return "CacheBlock [tag=" + tag + ", valid=" + isValid + ", dirty=" + isDirty + "]";
     }
 }

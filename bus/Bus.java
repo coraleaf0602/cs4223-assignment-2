@@ -1,5 +1,4 @@
 package bus;
-import message.*;
 
 public class Bus{
 
