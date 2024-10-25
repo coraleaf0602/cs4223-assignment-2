@@ -67,7 +67,6 @@ public class CPU {
          * report the maximum value across all cores) for the entire trace as well as
          * execution cycle per core 
          */
-        System.out.println(timer.getCurrentCycle());
         System.out.println("Overall Execution Cycle: " + timer.getCurrentCycle()); 
         /* 
          * 2. Number of compute cycles per core. These are the total number of cycles
