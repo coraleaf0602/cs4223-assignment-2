@@ -1,6 +1,7 @@
 package cpu;
 
 import cache.Cache;
+import timer.Timer; 
 
 public class CPU {
     private Cache cache;
@@ -13,6 +14,9 @@ public class CPU {
     private int dramLatency = 100;
     private int cacheHitLatency = 1; 
     private int DUMMY_DATA = 99;
+    private Timer timer = new Timer(); 
+    private int totalCycles = 0; 
+
 
     public CPU(Cache cache) {
         this.cache = cache;
@@ -22,13 +26,14 @@ public class CPU {
         String[] parts = instruction.split(" ");
         int type = Integer.parseInt(parts[0]);
         int address = Integer.decode(parts[1]);
-
+        timer.tick();
         if (type == 0) {
             // Load instruction
             loadInstructions++;
             boolean hit = cache.readToAddress(address);
             if (!hit) {
                 cacheMisses++;
+                timer.addCycles(dramLatency);
                 this.idleCycles += dramLatency; // Add DRAM latency on cache miss
             } else {
                 cacheHits++;
@@ -42,14 +47,17 @@ public class CPU {
                 cacheMisses++; 
                 // Need to know if DRAM latency was called 
                 if(hit == 2) { 
+                    timer.addCycles(dramLatency);
                     this.idleCycles += dramLatency;
                 }
             } else { 
                 cacheHits++; // Assuming store always hits the cache
+                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
             }
         } else if (type == 2) {
             // Compute cycles
             this.computeCycles += address;
+            timer.addCycles(address);
         }
     }
 
@@ -59,7 +67,8 @@ public class CPU {
          * report the maximum value across all cores) for the entire trace as well as
          * execution cycle per core 
          */
-        System.out.println("Overall Execution Cycle: " + (idleCycles + computeCycles)); 
+        System.out.println(timer.getCurrentCycle());
+        System.out.println("Overall Execution Cycle: " + timer.getCurrentCycle()); 
         /* 
          * 2. Number of compute cycles per core. These are the total number of cycles
          * spent processing other instructions between load/store instructions
@@ -68,7 +77,8 @@ public class CPU {
         /* 
          * 3. Number of load/store instructions per core
          */
-        System.out.println("Load Number: " + loadInstructions + " Store Number: " + storeInstructions);
+        System.out.println("Load Number: " + loadInstructions);
+        System.out.println("Store Number: " + storeInstructions);
         /* 
          * 4. Number of idle cycles (these are cycles where the core is waiting for the
          * request to the cache to be completed) per core
