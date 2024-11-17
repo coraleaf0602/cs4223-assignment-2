@@ -30,53 +30,44 @@ public class SingleCore {
             cacheSize = Integer.parseInt(args[2]);
             associativity = Integer.parseInt(args[3]);
             blockSize = Integer.parseInt(args[4]);
-
-            cache = new Cache(cacheSize, blockSize, associativity, dram, bus);
-            cpu = new CPU(cache);
-
-            // file mangagement
-            String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
-            // this can be bodytrack_four or fluidanimate_four
-            String benchmarkFolder = "Benchmarks/" + args[1] + "_four/";
-            // this can be changed into a for loop
-            String filePath = benchmarkFolder + args[1] + extensions[0];
-            inputFile = new File(filePath);
-
-            try {
-                Scanner myReader = new Scanner(inputFile);
-                while (myReader.hasNextLine()) {
-                    String data = myReader.nextLine();
-                    // Use to count the stats as well
-                    System.out.println(data);
-                    cpu.executeInstruction(data);
-                }
-                myReader.close();
-                System.out.println("===== Simulation Results =====");
-                cpu.reportStats(); // Report CPU statistics
-
-                /* 
-                * 6. Amount of Data traffic in bytes on the bus (this is due to bus read, bus
-                * read exclusive, bus writeback, and bus update transactions). Only include the
-                * traffic for data and not for address. Thus invalidation requests do not
-                * contribute to the data traffic.
-                */
-                System.out.println("Bus data traffic: " + bus.getDataTraffic() + " bytes");
-                /* 
-                 * 7. Number of invalidations or updates on the bus
-                 * 8. Distribution of accesses to private data versus shared data (for example,
-                 * access to modified state is private, while access to shared state is shared
-                 * data)
-                 */
-
-            } catch (FileNotFoundException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
-            }
         } else {
-            System.err.println("Error: Not enough arguments in program");
+            cacheSize = 4096; // Default cache size
+            associativity = 2;
+            blockSize = 32;
         }
+        cache = new Cache(cacheSize, blockSize, associativity, dram, bus);
+        cpu = new CPU(cache);
+        // file mangagement
+        String[] extensions = { "_0.data", "_1.data", "_2.data", "_3.data" };
+        // this can be bodytrack_four or fluidanimate_four
+        String benchmarkFolder = "Benchmarks/" + args[1] + "_four/";
+        // this can be changed into a for loop
+        String filePath = benchmarkFolder + args[1] + extensions[0];
+        inputFile = new File(filePath);
 
+        try {
+            Scanner myReader = new Scanner(inputFile);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                // Use to count the stats as well
+                System.out.println(data);
+                cpu.executeInstruction(data);
+            }
+            myReader.close();
+            System.out.println("===== Simulation Results =====");
+            cpu.reportStats(); // Report CPU statistics
+
+            System.out.println("Bus data traffic: " + bus.getDataTraffic() + " bytes");
+            /*
+             * 7. Number of invalidations or updates on the bus
+             * 8. Distribution of accesses to private data versus shared data (for example,
+             * access to modified state is private, while access to shared state is shared
+             * data)
+             */
+
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 }
-
-// coherence MESI blackscholes 1024 1 16
