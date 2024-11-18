@@ -1,5 +1,5 @@
 package cache;
 
-public enum CacheState { 
-    MODIFIED, EXCLUSIVE, SHARED, INVALID
+public interface CacheState {
+    String getStateInfo();
 }

@@ -2,35 +2,38 @@ package cache;
 
 public class CacheBlock {
     private int tag;
+    private CacheState state;
     private boolean isValid;
-    private boolean isDirty; 
+    private boolean isDirty;
     private int[] data; // Simulate the block's data (array of words)
 
     // Default Block Size: 32 bytes
     // size of word = 4 bytes
     // DEFAULT_BLOCK_WORDS = Default Block Size / size of word = 32 / 4 = 8
     private static final int DEFAULT_BLOCK_WORDS = 8;
-    private final int DEFAULT_WORD_SIZE = 4; 
+    private final int DEFAULT_WORD_SIZE = 4;
 
-    // Default constructor 
-    public CacheBlock() {
+    // Default constructor
+    public CacheBlock(CacheState state) {
         System.out.println("Initialising Cache Blocks");
         this.isValid = false;
         this.isDirty = false;
         this.data = new int[DEFAULT_BLOCK_WORDS];
+        this.state = state;
     }
 
-    // Constructor that takes in Block size 
-    public CacheBlock(int blockSize) { 
-        System.out.println("Initialising Cache Blocks of size " + blockSize + " bytes"); 
-        this.isValid = false; 
-        this.isDirty = false ; 
-        this.data = new int[blockSize/DEFAULT_WORD_SIZE]; 
+    // Constructor that takes in Block size and state
+    public CacheBlock(int blockSize, CacheState state) {
+        System.out.println("Initialising Cache Blocks of size " + blockSize + " bytes");
+        this.isValid = false;
+        this.isDirty = false;
+        this.data = new int[blockSize / DEFAULT_WORD_SIZE];
+        this.state = state;
     }
 
     // constructor with tag and data
-    public CacheBlock(int tag, int data, int blockSize) {
-        this(blockSize);
+    public CacheBlock(int tag, int data, int blockSize, CacheState state) {
+        this(blockSize, state);
         this.tag = tag;
         this.isValid = true;
         this.isDirty = false; // Assuming modified state upon write
@@ -50,8 +53,12 @@ public class CacheBlock {
         return this.isDirty;
     }
 
-    public int[] getData() { 
+    public int[] getData() {
         return this.data;
+    }
+
+    public CacheState getState() {
+        return this.state;
     }
 
     // Setters
@@ -67,8 +74,12 @@ public class CacheBlock {
         this.isDirty = isDirty;
     }
 
-    public void setData(int[] data) { 
-        this.data = data; 
+    public void setData(int[] data) {
+        this.data = data;
+    }
+
+    public void setState(CacheState state) {
+        this.state = state;
     }
 
     // Read data from the block

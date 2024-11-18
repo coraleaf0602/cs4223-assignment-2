@@ -1,24 +1,18 @@
 // for protocol, not imp rn
 
 package message;
+
 import cache.*;
+
 public class Message {
-
     enum MessageType {
-        READ_REQ,
-        WRITE_REQ, // for MESI protocol
-    };
+        BUS_RD, BUS_RDX, BUS_UPGR, BUS_INV, BUS_DATA, BUS_WRITEBACK
+    }
 
-    int senderID;
+    int pid;
     int stayOnBus;
-    CacheAddress address;
+    int address;
+    int data;
     MessageType type;
 
-    Message(int senderID, int stayOnBus, CacheAddress address, MessageType type){
-        this.senderID = senderID;
-        this.stayOnBus = stayOnBus;
-        this.address = address;
-        this.type = type;
-    }
-    
 }

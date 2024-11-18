@@ -1,8 +1,8 @@
 package bus;
 
-public class Bus{
+public class Bus {
 
-    private int dataTraffic = 0;  // Bytes transferred on the bus
+    private int dataTraffic = 0; // Bytes transferred on the bus
 
     public void sendDataToCache(int bytes) {
         this.dataTraffic += bytes;
@@ -17,19 +17,25 @@ public class Bus{
 
     // }
 
-    // void sendRequest(Message msg){
+    public void sendRequest(Message msg) {
+        // Handle the request, check the type of request, and forward it to the correct
+        // destination
+    }
 
-    // }
+    public void receiveRequest(Message msg) {
+        // Based on the message, determine if the block is present and respond
+        // accordingly
+    }
 
-    // void reply(Message msg){
+    public void reply(Message msg) {
+        // Respond with the result of the request (e.g., data from cache or memory)
+    }
 
-    // }
+    void propagationRequests() {
+        // Process all queued requests from caches and propagate them
+    }
 
-    // void propagationRequests(){
-
-    // }
-
-    // void propagationReply(){
-
-    // }
+    void propagationReply() {
+        // Send replies to the caches or memory based on the processed requests
+    }
 }
