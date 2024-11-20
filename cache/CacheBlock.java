@@ -32,12 +32,12 @@ public class CacheBlock {
     }
 
     // constructor with tag and data
-    public CacheBlock(int tag, int data, int blockSize, CacheState state) {
+    public CacheBlock(int tag, int[] data, int blockSize, CacheState state) {
         this(blockSize, state);
         this.tag = tag;
         this.isValid = true;
         this.isDirty = false; // Assuming modified state upon write
-        this.data[0] = data; // Store data in the first word (can be extended)
+        this.data = data; // Store data in the first word (can be extended)
     }
 
     // Getters
@@ -108,4 +108,5 @@ public class CacheBlock {
     public String toString() {
         return "CacheBlock [tag=" + tag + ", valid=" + isValid + ", dirty=" + isDirty + "]";
     }
+
 }

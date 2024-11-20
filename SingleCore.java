@@ -15,7 +15,7 @@ public class SingleCore {
         int associativity;
         int blockSize;
 
-        DRAM dram = new DRAM(10, 100);
+        DRAM dram = new DRAM(100);
         Bus bus = new Bus();
         Cache cache;
         CPU cpu;

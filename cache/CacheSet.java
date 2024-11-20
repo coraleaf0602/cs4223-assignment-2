@@ -45,5 +45,9 @@ public class CacheSet {
         }
         return null;
     }
+
+    public CacheBlock getLRUBlock() {
+        return blocks.getLast();
+    }
 }
 

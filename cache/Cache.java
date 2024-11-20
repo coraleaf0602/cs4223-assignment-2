@@ -65,14 +65,14 @@ public class Cache {
             // Cache miss
             System.out.println("Cache miss. Fetching from memory...");
             // Fetch block from DRAM - simulate fetching from DRAM using memory address
-            int data = dram.readBlock(address);
+            int[] data = dram.readBlock(address);
             bus.sendDataToCache(MEMORY_SIZE_IN_BYTES); // Simulate 32 bytes transferred over the bus
             cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), data, blockSize));
             return false; // Indicate miss
         }
     }
 
-    public int writeToAddress(int address, int data) {
+    public int writeToAddress(int address, int[] data) {
         int isDirty = -1;
         // Parse the memory address to get the cache-specific information
         CacheAddress addressToWrite = this.parseMemoryAddress(address);
@@ -92,7 +92,7 @@ public class Cache {
             System.out.println("Cache miss on write. Fetching block from memory...");
             isDirty = 0;
             // Fetch data from memory (simulating the data fetch)
-            int fetchedData = dram.readBlock(address);
+            int[] fetchedData = dram.readBlock(address);
             // Simulate 32 bytes of data being transferred over the bus
             bus.sendDataToCache(MEMORY_SIZE_IN_BYTES);
             CacheBlock newBlock = new CacheBlock(addressToWrite.getTag(), fetchedData, blockSize);
@@ -123,5 +123,12 @@ public class Cache {
         // Parse the memory address to get the cache-specific information
         CacheAddress addressToWrite = this.parseMemoryAddress(address);
         return addressToWrite;
+    }
+
+    public CacheSet findSet(int address) {
+        CacheAddress addressToWrite = this.parseMemoryAddress(address);
+        // Get the appropriate cache set based on the set index
+        CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());
+        return cacheSet;
     }
 }

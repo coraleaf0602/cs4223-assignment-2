@@ -3,11 +3,7 @@ package protocol;
 import cache.*;
 
 public interface Protocol {
-    void readCache(CacheBlock block);
+    int[] readCache(CacheBlock block, int address, CacheController controller);
 
-    void writeCache(int address, int data, Cache cache);
-
-    void cacheMiss(int address, boolean isWrite);
-
-    void cacheHit(int address, boolean isWrite);
+    void writeCache(int address, int data, Cache cache, CacheController controller);
 }
