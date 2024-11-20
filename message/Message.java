@@ -1,31 +1,32 @@
-// for protocol, not imp rn
-
 package message;
 
+import cache.CacheState;
+
 public class Message {
+    private int senderId;  // The ID of the sender, typically a CPU or cache controller
+    private int address; // The cache address involved in the message
+    private MessageType type;     // The type of message, such as READ_REQ or WRITE_REQ
+    private int[] data;
+    private CacheState state;
 
-    int pid;
-    int address;
-    int data;
-    MessageType type;
+    // Constructor for sending data
+    public Message(MessageType type, int address, int senderId, int[] data) {
+        this.senderId = senderId;
+        this.address = address;
+        this.type = type;
+        this.data = data;
+    }
 
-    public Message(int pid, int address, MessageType type) {
-        this.pid = pid;
+    // Constructor for no data sent
+    public Message(MessageType type, int address, int senderID) {
+        this.senderId = senderID;
         this.address = address;
         this.type = type;
     }
 
-    public Message(int pid, int address, MessageType type, int data) {
-        this(pid, address, type);
-        this.data = data;
-    }
-
-    public int getPid() {
-        return pid;
-    }
-
-    public void setPid(int pid) {
-        this.pid = pid;
+    // Getters and Setters
+    public int getSenderId() {
+        return senderId;
     }
 
     public int getAddress() {
@@ -36,19 +37,19 @@ public class Message {
         this.address = address;
     }
 
-    public int getData() {
-        return data;
-    }
-
-    public void setData(int data) {
-        this.data = data;
-    }
-
     public MessageType getType() {
         return type;
     }
 
     public void setType(MessageType type) {
         this.type = type;
+    }
+
+    public void setData(int[] data) {
+        this.data = data;
+    }
+
+    public int[] getData() {
+        return data;
     }
 }

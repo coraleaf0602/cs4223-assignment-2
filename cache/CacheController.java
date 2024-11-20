@@ -20,25 +20,24 @@ public class CacheController {
         this.dram = dram;
     }
 
-    public void readAddress(int address) {
-        CacheBlock block = cache.findBlock(address);
-        protocol.readCache(block, address, this);
-    }
-
-    public void writeAddress(int address, int data) {
-        protocol.writeCache(address, data, this.cache, this);
-    }
-
     public void receiveMessage(Message msg) {
-        protocol.handleMessage(msg, this);
+        MessageType type = msg.getType();
+        switch(type) {
+        case BUS_RD:
+            protocol.receiveBusRd(msg.getAddress(), this.cache, this, msg.getSenderId());
+            break;
+        case BUS_RDX:
+            protocol.receiveBusRdX(msg.getAddress(), this.cache, this);
+        case BUS_UPGR:
+            protocol.receiveBusUpd(msg.getAddress(), msg.getData(), this.cache, this);
+        case BUS_DATA:
+            protocol.receiveData(msg.getAddress(), msg.getData(), this.cache);
+            break;
+        }
     }
 
     public void sendMessage(Message msg) {
-        bus.send(msg);
-    }
-
-    public void sendData(CacheBlock block) {
-        bus.send(block);
+        bus.receiveRequest(msg);
     }
 
     public int getID() {
@@ -54,13 +53,18 @@ public class CacheController {
         CacheBlock blockToEvict = set.getLRUBlock();  // Method to get the least recently used block
 
         if (blockToEvict.isDirty()) {
-            flushDataToMemory(blockToEvict);  // Ensure data is not lost
+            flushDataToMemory(blockToEvict, address);  // Ensure data is not lost
         }
 
         set.get(blockToEvict);  // Physically remove the block from the cache set
 
         System.out.println("Evicted block with tag: " + blockToEvict.getTag() + " from set: " + setIndex);
         return blockToEvict;  // Return the evicted block, might be useful for testing or logging
+    }
+
+    public boolean hasBlock(int address) {
+       CacheBlock block = this.cache.findBlock(address);
+       return block != null;
     }
 
     public void flushDataToMemory(CacheBlock block, int address) {

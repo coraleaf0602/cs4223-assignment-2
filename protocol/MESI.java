@@ -2,7 +2,6 @@ package protocol;
 
 import cache.*;
 import message.*;
-import memory.DRAM;
 
 public class MESI implements Protocol {
     // Handle read operations. Check the current state, and if necessary, request
@@ -16,26 +15,19 @@ public class MESI implements Protocol {
             case MODIFIED:
                 data = block.getData();
                 // Return the data directly from the cache.
-                // No bus action is necessary since this processor has the only valid copy of
-                // the data.
                 break;
             case EXCLUSIVE:
                 // Return the data directly from the cache.
-                // Again, no bus action is needed because no other cache has a copy of this
-                // data.
                 data = block.getData();
                 break;
             case SHARED:
+                data = block.getData();
                 break;
             case INVALID:
                 // The processor must issue a BusRd (Bus Read) operation to read the data
                 // from either another cache or from the main memory.
-                // Depending on whether another cache responds with the data
-                // (and whether it was Modified there), this state may transition to Shared
-                // (if other caches also hold the data) or Exclusive (if no other cache holds
-                // the data);
-                // int pid, int address, MessageType type
-                controller.sendMessage(new Message(controller.getID(), address, MessageType.BUS_RD ));
+                // Sending request to bus to ask for permission to read
+                controller.sendMessage(new Message(MessageType.BUS_RD, address, controller.getID()));
                 break;
         }
         return data;
@@ -45,7 +37,7 @@ public class MESI implements Protocol {
     // and needs modification,
     // transition to Modified (M). Otherwise, issue a BusRdX to gain ownership.
     @Override
-    public void writeCache(int address, int data, Cache cache, CacheController controller) {
+    public void writeCache(int address, int[] data, Cache cache, CacheController controller) {
         CacheAddress addressToWrite = cache.findAddress(address);
         CacheBlock block = cache.findBlock(address);
         MESIState state = (MESIState) block.getState(); // Cast to MESIState
@@ -66,6 +58,7 @@ public class MESI implements Protocol {
                  * The state transitions from Exclusive to Modified.
                  */
                 block.setState(MESIState.MODIFIED);
+                block.write(addressToWrite.getBlockOffset(), data);
                 break;
             case SHARED:
                 /*
@@ -76,9 +69,7 @@ public class MESI implements Protocol {
                  * block, ensuring that this cache has exclusive access before it modifies the
                  * data.
                  */
-                controller.sendMessage(new Message(controller.getID(), address, MessageType.BUS_RDX, data));
-                // Wait for a response
-                // Transition to Modified after bus responds
+                controller.sendMessage(new Message(MessageType.BUS_RDX, address, controller.getID(), data));
                 break;
             case INVALID:
                 /*
@@ -88,61 +79,84 @@ public class MESI implements Protocol {
                  * This action ensures that the cache line is fetched and that all other copies
                  * (if any exist) are invalidated.
                  */
-                controller.sendMessage(new Message(controller.getID(), address, MessageType.BUS_RDX, data));
-                // Wait for a response
-                // Transition to Modified
+                controller.sendMessage(new Message(MessageType.BUS_RDX, address, controller.getID(), data));
                 break;
             default:
         }
     }
 
-    public void receiveBusRd(int address, Cache cache, CacheController controller) {
+    @Override
+    public void receiveBusRd(int address, Cache cache, CacheController controller, int senderID) {
     /*
      * Respond to a BusRd broadcast from another processor. Transition from Modified
     to Shared or from Exclusive to Shared, providing the data to the requester.
     * */
+        // Check if we have the block
         CacheBlock block = cache.findBlock(address);
-        if (block != null && (block.getState() == MESIState.MODIFIED || block.getState() == MESIState.EXCLUSIVE)) {
-            controller.sendData(block); // Method to handle sending data
-            block.setState(MESIState.SHARED);
+        if(block != null) {
+            MESIState state = (MESIState) block.getState();
+            // Send data back to bus
+            controller.sendMessage(new Message(MessageType.BUS_DATA, address, senderID, block.getData()));
+            switch(state) {
+            case MODIFIED:
+                // Write back to main memory
+                controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, controller.getID(), block.getData()));
+                block.setState(MESIState.SHARED);
+                System.out.println("BusRd + Cache Modified -> Shared");
+                break;
+            case EXCLUSIVE:
+                block.setState(MESIState.SHARED);
+                System.out.println("BusRd + Cache Exclusive -> Shared");
+                break;
+            case SHARED:
+                // do nothing
+                System.out.println("BusRd + Cache Shared");
+                break;
+            }
+        }
+        controller.sendMessage(new Message(MessageType.BUS_DATA, address, senderID, null));
+    }
+
+    // Need some way to get the data originally sent out in the request
+    @Override
+    public void receiveData(int address, int[] data, Cache cache) {
+        // Receives the data that it was looking for - this means block in cache is in Invalid State
+        CacheBlock block = cache.findBlock(address);
+
+        // This data indicates whether if the data is found or not
+        if(block.getState() == MESIState.INVALID) {
+            if(data == null || data.length == 0) {
+                block.setState(MESIState.EXCLUSIVE);
+            } else {
+                block.setState(MESIState.SHARED);
+            }
+        } else {
+            System.out.println("Block was NOT in Invalid State despite requesting for data");
         }
     }
 
+    @Override
+    // Responds to a BusRdX when another processor intends to write to a cache
     public void receiveBusRdX(int address, Cache cache, CacheController controller) {
-        // Respond to a BusRdX when another processor intends to write. If in Modified
-        // or Exclusive
-        // state, flush the data to memory and transition to Invalid.
         CacheBlock block = cache.findBlock(address);
-        if (block != null && (block.getState() == MESIState.MODIFIED || block.getState() == MESIState.EXCLUSIVE)) {
-            controller.flushDataToMemory(block, address); // Write back to memory
+        if (block != null) {
+            if (block.getState() == MESIState.MODIFIED) {
+                controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, controller.getID(), block.getData())); // Write back to memory
+            }
             block.setState(MESIState.INVALID);
+            block.setData(null);
+            controller.sendMessage(new Message(MessageType.BUS_INV, address, controller.getID(), block.getData()));
         }
     }
 
+    @Override
     public void receiveBusUpd(int address, int[] data, Cache cache, CacheController controller) {
         // Update the block data during a BusUpd operation, applicable if the cache
-        // block is in
-        // the Shared state.
+        // block is in the Shared state.
         CacheBlock block = cache.findBlock(address);
         if (block != null && block.getState() == MESIState.SHARED) {
             block.setData(data);
+            block.setState(MESIState.MODIFIED);
         }
-    }
-
-    public void evictBlock(int address, Cache cache, CacheController controller) {
-        // Manage eviction of a cache block, ensuring that data in the Modified state is
-        // written back to memory before eviction.
-        CacheBlock block = cache.findBlock(address);
-        if (block != null && block.getState() == MESIState.MODIFIED) {
-            if (block.isDirty()) {
-                controller.flushDataToMemory(block, address);
-                // Update the block's state to not dirty after successful write-back
-                block.setDirty(false);
-                // Optionally, update the block's state depending on your protocol's requirements
-                block.setState(MESIState.SHARED);
-                System.out.println("Data flushed from cache block with tag " + block.getTag() + " to DRAM at address " + address);
-            }
-        }
-        controller.removeBlock(address); // Method to handle removing the block from cache
     }
 }

@@ -109,7 +109,6 @@ public class Cache {
     }
 
     public CacheBlock findBlock(int address) {
-        // Parse the memory address to get the cache-specific information
         CacheAddress addressToWrite = this.parseMemoryAddress(address);
         // Get the appropriate cache set based on the set index
         CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());

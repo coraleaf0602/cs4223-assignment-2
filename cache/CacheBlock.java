@@ -93,7 +93,7 @@ public class CacheBlock {
     }
 
     // Write data to the block
-    public void write(int offset, int value) {
+    public void write(int offset, int[] value) {
         if (isValid) {
             offset /= DEFAULT_WORD_SIZE; // Convert byte offset to word index
             data[offset] = value;
@@ -102,6 +102,7 @@ public class CacheBlock {
             throw new IllegalStateException("Cache block is not valid!");
         }
     }
+
 
     // Override toString for debugging
     @Override
