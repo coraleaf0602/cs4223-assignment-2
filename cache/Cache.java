@@ -51,62 +51,62 @@ public class Cache {
         return new CacheAddress(blockNumber, blockOffset, setIndex, tag);
     }
 
-    public boolean readToAddress(int address) {
-        CacheAddress addressToRead = this.parseMemoryAddress(address);
-        CacheSet cacheSet = cache.get(addressToRead.getSetIndex());
-        CacheBlock block = cacheSet.getBlockByTag(addressToRead.getTag());
-
-        if (block != null) {
-            // Cache hit
-            System.out.println("Cache hit!");
-            // Update LRU order of block - already done
-            return true;
-        } else {
-            // Cache miss
-            System.out.println("Cache miss. Fetching from memory...");
-            // Fetch block from DRAM - simulate fetching from DRAM using memory address
-            int[] data = dram.readBlock(address);
-            bus.sendDataToCache(MEMORY_SIZE_IN_BYTES); // Simulate 32 bytes transferred over the bus
-            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), data, blockSize));
-            return false; // Indicate miss
-        }
-    }
-
-    public int writeToAddress(int address, int[] data) {
-        int isDirty = -1;
-        // Parse the memory address to get the cache-specific information
-        CacheAddress addressToWrite = this.parseMemoryAddress(address);
-        // Get the appropriate cache set based on the set index
-        CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());
-        // Search for the block with the given tag
-        CacheBlock block = cacheSet.getBlockByTag(addressToWrite.getTag());
-        if (block != null) {
-            // Cache hit: Write data to the block
-            System.out.println("Cache hit on write!");
-            block.write(addressToWrite.getBlockOffset(), data);
-            // Update LRU position - already done
-            isDirty = 1;
-            return isDirty;
-        } else {
-            // Cache miss: Fetch the block from memory and insert into the cache
-            System.out.println("Cache miss on write. Fetching block from memory...");
-            isDirty = 0;
-            // Fetch data from memory (simulating the data fetch)
-            int[] fetchedData = dram.readBlock(address);
-            // Simulate 32 bytes of data being transferred over the bus
-            bus.sendDataToCache(MEMORY_SIZE_IN_BYTES);
-            CacheBlock newBlock = new CacheBlock(addressToWrite.getTag(), fetchedData, blockSize);
-            // Insert the new block into the cache set
-            CacheBlock dirtyBlock = cacheSet.insertBlock(newBlock);
-            if (dirtyBlock != null) {
-                dram.writeBlock(address, data);
-                isDirty = 2;
-            }
-            // Now, write to the block that has been inserted
-            newBlock.write(addressToWrite.getBlockOffset(), data);
-            return isDirty;
-        }
-    }
+//    public boolean readToAddress(int address) {
+//        CacheAddress addressToRead = this.parseMemoryAddress(address);
+//        CacheSet cacheSet = cache.get(addressToRead.getSetIndex());
+//        CacheBlock block = cacheSet.getBlockByTag(addressToRead.getTag());
+//
+//        if (block != null) {
+//            // Cache hit
+//            System.out.println("Cache hit!");
+//            // Update LRU order of block - already done
+//            return true;
+//        } else {
+//            // Cache miss
+//            System.out.println("Cache miss. Fetching from memory...");
+//            // Fetch block from DRAM - simulate fetching from DRAM using memory address
+//            int[] data = dram.readBlock(address);
+//            bus.sendDataToCache(MEMORY_SIZE_IN_BYTES); // Simulate 32 bytes transferred over the bus
+//            cacheSet.insertBlock(new CacheBlock(addressToRead.getTag(), data, blockSize));
+//            return false; // Indicate miss
+//        }
+//    }
+//
+//    public int writeToAddress(int address, int[] data) {
+//        int isDirty = -1;
+//        // Parse the memory address to get the cache-specific information
+//        CacheAddress addressToWrite = this.parseMemoryAddress(address);
+//        // Get the appropriate cache set based on the set index
+//        CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());
+//        // Search for the block with the given tag
+//        CacheBlock block = cacheSet.getBlockByTag(addressToWrite.getTag());
+//        if (block != null) {
+//            // Cache hit: Write data to the block
+//            System.out.println("Cache hit on write!");
+//            block.write(addressToWrite.getBlockOffset(), data);
+//            // Update LRU position - already done
+//            isDirty = 1;
+//            return isDirty;
+//        } else {
+//            // Cache miss: Fetch the block from memory and insert into the cache
+//            System.out.println("Cache miss on write. Fetching block from memory...");
+//            isDirty = 0;
+//            // Fetch data from memory (simulating the data fetch)
+//            int[] fetchedData = dram.readBlock(address);
+//            // Simulate 32 bytes of data being transferred over the bus
+//            bus.sendDataToCache(MEMORY_SIZE_IN_BYTES);
+//            CacheBlock newBlock = new CacheBlock(addressToWrite.getTag(), fetchedData, blockSize);
+//            // Insert the new block into the cache set
+//            CacheBlock dirtyBlock = cacheSet.insertBlock(newBlock);
+//            if (dirtyBlock != null) {
+//                dram.writeBlock(address, data);
+//                isDirty = 2;
+//            }
+//            // Now, write to the block that has been inserted
+//            newBlock.write(addressToWrite.getBlockOffset(), data);
+//            return isDirty;
+//        }
+//    }
 
     public CacheBlock findBlock(int address) {
         CacheAddress addressToWrite = this.parseMemoryAddress(address);
@@ -122,12 +122,5 @@ public class Cache {
         // Parse the memory address to get the cache-specific information
         CacheAddress addressToWrite = this.parseMemoryAddress(address);
         return addressToWrite;
-    }
-
-    public CacheSet findSet(int address) {
-        CacheAddress addressToWrite = this.parseMemoryAddress(address);
-        // Get the appropriate cache set based on the set index
-        CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());
-        return cacheSet;
     }
 }

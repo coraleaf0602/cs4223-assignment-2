@@ -12,10 +12,11 @@ public class Bus {
     private Queue<Message> requestMessages = new LinkedList<>();
     private Queue<Message> replyMessages = new LinkedList<>();
     private ArrayList<Integer> invalidateMessages = new ArrayList<>();
+    private int numberOfInvalidations = 0;
     private int dataTraffic = 0; // Bytes transferred on the bus
     private DRAM dram;
 
-    public void Bus(DRAM dram) {
+    public Bus(DRAM dram) {
         this.dram = dram;
     }
     // Increments the total data traffic counter whenever data is sent over the bus
@@ -92,6 +93,7 @@ public class Bus {
         case BUS_INV:
             // Receives a request that the block copies have been invalidated
             // Check if the arraylist is empty
+            numberOfInvalidations++;
             if(!invalidateMessages.isEmpty()) {
                 invalidateMessages.remove(msg.getSenderId());
                 if(invalidateMessages.size() == 1) {
@@ -119,12 +121,17 @@ public class Bus {
         }
     }
 
-    public void reply(Message msg) {
-        // Respond with the result of the request (e.g., data from cache or memory)
-        CacheController requestingController = getControllerById(msg.getReceiverId());
-        if (requestingController != null) {
-            requestingController.receiveMessage(msg);
-        }
+    public void reportStats() {
+        System.out.println("Bus data traffic: " + this.getDataTraffic() + " bytes");
+        /*
+         * 7. Number of invalidations or updates on the bus
+         *
+         * 8. Distribution of accesses to private data versus shared data (for example,
+         * access to modified state is private, while access to shared state is shared
+         * data)
+         */
+        System.out.println("Number of Invalidations/Updates on the bus: " + numberOfInvalidations);
+        System.out.println("");
     }
 //
 //    void propagationReply() {

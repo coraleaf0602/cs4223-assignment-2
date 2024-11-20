@@ -48,29 +48,8 @@ public class CacheController {
         this.pid = pid;
     }
 
-    public CacheBlock removeBlock(int address) {
-        CacheSet set = cache.findSet(address);
-        CacheBlock blockToEvict = set.getLRUBlock();  // Method to get the least recently used block
-
-        if (blockToEvict.isDirty()) {
-            flushDataToMemory(blockToEvict, address);  // Ensure data is not lost
-        }
-
-        set.get(blockToEvict);  // Physically remove the block from the cache set
-
-        System.out.println("Evicted block with tag: " + blockToEvict.getTag() + " from set: " + setIndex);
-        return blockToEvict;  // Return the evicted block, might be useful for testing or logging
-    }
-
     public boolean hasBlock(int address) {
        CacheBlock block = this.cache.findBlock(address);
        return block != null;
-    }
-
-    public void flushDataToMemory(CacheBlock block, int address) {
-        // Assuming block.getAddress() returns the memory address to write to
-        int[] dataToWrite = block.getData();
-        // Simulating DRAM write (assuming DRAM.write method exists)
-        dram.writeBlock(address, dataToWrite);
     }
 }

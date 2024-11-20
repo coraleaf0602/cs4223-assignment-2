@@ -15,9 +15,11 @@ public class CPU {
     private int cacheHitLatency = 1;
     private int DUMMY_DATA = 99;
     private Timer timer = new Timer();
+    private int pid;
 
-    public CPU(Cache cache) {
+    public CPU(Cache cache, int pid) {
         this.cache = cache;
+        this.pid = pid;
     }
 
     public void executeInstruction(String instruction) {
@@ -25,9 +27,21 @@ public class CPU {
         int type = Integer.parseInt(parts[0]);
         int address = Integer.decode(parts[1]);
         timer.tick();
-        if (type == 0) {
-            // Load instruction
-            loadInstructions++;
+        switch(type) {
+        case 0:
+            processLoad(address);
+            break;
+        case 1:
+            processStore(address);
+            break;
+        case 2:
+            processCompute(address);
+            break;
+        }
+    }
+
+    private void processLoad(int address) {
+        loadInstructions++;
             boolean hit = cache.readToAddress(address);
             if (!hit) {
                 cacheMisses++;
@@ -37,8 +51,10 @@ public class CPU {
                 cacheHits++;
                 this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
             }
-        } else if (type == 1) {
-            // Store instruction
+    }
+
+    private void processStore(int address) {
+         // Store instruction
             storeInstructions++;
             int hit = cache.writeToAddress(address, DUMMY_DATA);
             if (hit == 1 || hit == 2) {
@@ -52,11 +68,12 @@ public class CPU {
                 cacheHits++; // Assuming store always hits the cache
                 this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
             }
-        } else if (type == 2) {
-            // Compute cycles
+    }
+
+    private void processCompute(int address) {
+        // Compute cycles
             this.computeCycles += address;
             timer.addCycles(address);
-        }
     }
 
     public void reportStats() {

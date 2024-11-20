@@ -96,7 +96,7 @@ public class CacheBlock {
     public void write(int offset, int[] value) {
         if (isValid) {
             offset /= DEFAULT_WORD_SIZE; // Convert byte offset to word index
-            data[offset] = value;
+            data = value;
             this.isDirty = true; // Mark block as dirty since it has been modified
         } else {
             throw new IllegalStateException("Cache block is not valid!");
