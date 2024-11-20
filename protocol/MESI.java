@@ -137,15 +137,15 @@ public class MESI implements Protocol {
 
     @Override
     // Responds to a BusRdX when another processor intends to write to a cache
-    public void receiveBusRdX(int address, Cache cache, CacheController controller) {
+    public void receiveBusRdX(int address, Cache cache, CacheController controller, int senderID) {
         CacheBlock block = cache.findBlock(address);
         if (block != null) {
             if (block.getState() == MESIState.MODIFIED) {
-                controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, controller.getID(), block.getData())); // Write back to memory
+                controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, senderID, block.getData())); // Write back to memory
             }
             block.setState(MESIState.INVALID);
             block.setData(null);
-            controller.sendMessage(new Message(MessageType.BUS_INV, address, controller.getID(), block.getData()));
+            controller.sendMessage(new Message(MessageType.BUS_INV, address, senderID, block.getData()));
         }
     }
 

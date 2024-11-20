@@ -71,21 +71,14 @@ public class Bus {
                 if(controller.getID() != msg.getSenderId() && controller.hasBlock(msg.getAddress())) {
                     invalidateMessages.add(controller.getID());
                     controller.receiveMessage(msg);
-                } else {
-                    // Add receiver ID (original sender to the head of list)
-                    invalidateMessages.add(0, controller.getID());
                 }
             }
 
-            // If it's just the original sender
-            if(invalidateMessages.size() == 1) {
+            if(invalidateMessages.isEmpty()) {
                 // Fetch from memory and send back to cache if there is no copy
                 int[] data = dram.readBlock(msg.getAddress());
-                int requestorId = invalidateMessages.get(0);
-                CacheController controller = caches.get(requestorId);
-                if(controller.getID() == msg.getSenderId()) {
-                    controller.receiveMessage(new Message(MessageType.BUS_DATA, msg.getAddress(), requestorId, data));
-                }
+                CacheController controller = caches.get(msg.getSenderId());
+                controller.receiveMessage(new Message(MessageType.BUS_DATA, msg.getAddress(), msg.getSenderId(), data));
             }
             break;
         case BUS_UPGR:
@@ -108,12 +101,10 @@ public class Bus {
             break;
         case BUS_DATA:
             // Receives a request with data for the requesting cache
-            for(CacheController controller : caches) {
-                if (controller.getID() == msg.getSenderId()) {
-                    // Sends back to requesting cache
-                    controller.receiveMessage(msg);
-                }
-            }
+            int senderId = msg.getSenderId();
+            CacheController controller = caches.get(senderId);
+            // Sends back to requesting cache
+            controller.receiveMessage(msg);
             break;
         case BUS_WRITEBACK:
 
@@ -133,34 +124,4 @@ public class Bus {
         System.out.println("Number of Invalidations/Updates on the bus: " + numberOfInvalidations);
         System.out.println("");
     }
-//
-//    void propagationReply() {
-//        // Send replies to the caches or memory based on the processed requests
-//        while (!replyQueue.isEmpty()) {
-//            Message msg = replyQueue.poll(); // Dequeue the next reply
-//            reply(msg); // Send the reply to the appropriate cache controller
-//        }
-//    }
-//
-//    public void propagateRequests() {
-//        while (!requestMessages.isEmpty()) {
-//            Message msg = requestMessages.poll();
-//            boolean[] flags = new boolean[caches.size()];
-//            CacheBlock[] cacheBlocks = new CacheBlock[caches.size()];
-//
-//            if (msg.getBusCycles() == -1) {
-//                msg.setBusCycles(TimeConfig.CACHE_HIT);
-//                for (int i = 0; i < caches.size(); ++i) {
-//                    Cache cache = caches.get(i).getCache();
-//                    cacheBlocks[i] = cache.getSet(msg.getAddress().getSetIndex()).isHitMsg(msg.getAddress().getTag());
-//                    flags[i] = (cacheBlocks[i] != null);
-//                }
-//
-//                msg.setBusCycles(msg.getBusCycles() + protocol.processMsg(msg, flags, cacheBlocks));
-//            }
-//            msg.decrementStayInBus();
-//            this.sendReply(msg);
-//        }
-//    }
-
 }

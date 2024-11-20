@@ -11,7 +11,7 @@ public interface Protocol {
 
     void receiveData(int address, int[] data, Cache cache);
 
-    void receiveBusRdX(int address, Cache cache, CacheController controller);
+    void receiveBusRdX(int address, Cache cache, CacheController controller, int senderID);
 
     void receiveBusUpd(int address, int[] data, Cache cache, CacheController controller);
 }

@@ -27,7 +27,7 @@ public class CacheController {
             protocol.receiveBusRd(msg.getAddress(), this.cache, this, msg.getSenderId());
             break;
         case BUS_RDX:
-            protocol.receiveBusRdX(msg.getAddress(), this.cache, this);
+            protocol.receiveBusRdX(msg.getAddress(), this.cache, this, msg.getSenderId());
         case BUS_UPGR:
             protocol.receiveBusUpd(msg.getAddress(), msg.getData(), this.cache, this);
         case BUS_DATA:
