@@ -39,23 +39,26 @@ public class Dragon implements Protocol {
             switch (state) {
             case EXCLUSIVE:
                 // Write to cache
-                block.write(address, data);
+                block.write(cache.findAddress(address).getBlockOffset(), data);
                 // Change to Dirty
                 block.setState(DragonState.DIRTY);
                 break;
             case SHARED_CLEAN:
                 // BusUpd to notify other caches to update their copy
                 // State changes to Sm + others change their state to Sm
-                controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID()));
+                controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
                 block.setState(DragonState.SHARED_MODIFIED);
+                block.write(cache.findAddress(address).getBlockOffset(), data);
                 break;
             case SHARED_MODIFIED:
                 // Bus Upd to ensure all other caches update
+                controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
+                block.write(cache.findAddress(address).getBlockOffset(), data);
                 // No state change
                 break;
             case DIRTY:
                 // Direct write
-                block.write(address, data);
+                block.write(cache.findAddress(address).getBlockOffset(), data);
                 break;
             }
         }
@@ -125,7 +128,7 @@ public class Dragon implements Protocol {
     public void receiveBusRdX(int address, Cache cache, CacheController controller, int senderId) {
         // Other caches don't have a copy
         CacheBlock block = cache.findBlock(address);
-        if (block != null) {
+        if (block.isValid()) {
             if (block.getState() == DragonState.DIRTY) {
                 controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, senderId, block.getData())); // Write back to memory
             }
@@ -138,6 +141,24 @@ public class Dragon implements Protocol {
 
     @Override
     public void receiveBusUpd(int address, int[] data, Cache cache, CacheController controller) {
-
+        CacheBlock block = cache.findBlock(address);
+        if(block.isValid()) {
+            DragonState state = (DragonState) block.getState();
+            switch (state) {
+                case EXCLUSIVE:
+                    System.out.println("Exclusive + BusUpd should not happen");
+                    break;
+            case SHARED_CLEAN:
+                block.write(cache.findAddress(address).getBlockOffset(), data);
+                block.setState(DragonState.SHARED_MODIFIED);
+                break;
+            case SHARED_MODIFIED:
+                block.write(cache.findAddress(address).getBlockOffset(), data);
+                break;
+            case DIRTY:
+                System.out.println("Dirty + BusUpd should not happen");
+                break;
+            }
+        }
     }
 }
