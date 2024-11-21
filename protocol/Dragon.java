@@ -8,67 +8,67 @@ public class Dragon implements Protocol {
 
     @Override
     public int[] readCache(CacheBlock block, int address, CacheController controller) {
-        if(!block.isValid()) {
-            DragonState state = (DragonState) block.getState();
-            int[] data = null;
-            switch (state) {
-            case EXCLUSIVE:
-                data = block.getData();
-                break;
-            case SHARED_CLEAN:
-                data = block.getData();
-                break;
-            case SHARED_MODIFIED:
-                data = block.getData();
-                break;
-            case DIRTY:
-                data = block.getData();
-                break;
-            }
-            return data;
+        DragonState state = (DragonState) block.getState();
+        int[] data = null;
+        switch (state) {
+        case EXCLUSIVE:
+            data = block.getData();
+            break;
+        case SHARED_CLEAN:
+            data = block.getData();
+            break;
+        case SHARED_MODIFIED:
+            data = block.getData();
+            break;
+        case DIRTY:
+            data = block.getData();
+            break;
+        case INVALID:
+            controller.sendMessage(new Message(MessageType.BUS_RD, address, controller.getID()));
+            System.out.println("Read Miss: Sending bus message");
+            break;
         }
-        controller.sendMessage(new Message(MessageType.BUS_RD, address, controller.getID()));System.out.println("Read Miss: Sending bus message");
-        return null;
+        return data;
     }
 
     @Override
     public void writeCache(int address, int[] data, Cache cache, CacheController controller) {
         CacheBlock block = cache.findBlock(address);
-        if(!block.isValid()) {
-            DragonState state = (DragonState) block.getState();
-            switch (state) {
-            case EXCLUSIVE:
-                // Write to cache
-                block.write(cache.findAddress(address).getBlockOffset(), data);
-                // Change to Dirty
-                block.setState(DragonState.DIRTY);
-                break;
-            case SHARED_CLEAN:
-                // BusUpd to notify other caches to update their copy
-                // State changes to Sm + others change their state to Sm
-                controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
-                block.setState(DragonState.SHARED_MODIFIED);
-                block.write(cache.findAddress(address).getBlockOffset(), data);
-                break;
-            case SHARED_MODIFIED:
-                // Bus Upd to ensure all other caches update
-                controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
-                block.write(cache.findAddress(address).getBlockOffset(), data);
-                // No state change
-                break;
-            case DIRTY:
-                // Direct write
-                block.write(cache.findAddress(address).getBlockOffset(), data);
-                break;
-            }
+        DragonState state = (DragonState) block.getState();
+        switch (state) {
+        case EXCLUSIVE:
+            // Write to cache
+            block.write(cache.findAddress(address).getBlockOffset(), data);
+            // Change to Dirty
+            block.setState(DragonState.DIRTY);
+            break;
+        case SHARED_CLEAN:
+            // BusUpd to notify other caches to update their copy
+            // State changes to Sm + others change their state to Sm
+            controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
+            block.setState(DragonState.SHARED_MODIFIED);
+            block.write(cache.findAddress(address).getBlockOffset(), data);
+            break;
+        case SHARED_MODIFIED:
+            // Bus Upd to ensure all other caches update
+            controller.sendMessage(new Message(MessageType.BUS_UPGR, address, controller.getID(), data));
+            block.write(cache.findAddress(address).getBlockOffset(), data);
+            // No state change
+            break;
+        case DIRTY:
+            // Direct write
+            block.write(cache.findAddress(address).getBlockOffset(), data);
+            break;
+        case INVALID:
+            // Write Miss
+            // BusRdX
+            // If no valid copies - fetched from memory + set to dirty
+            // If valid copies, send copy then invalidate their copy and wb if they were dirty
+            controller.sendMessage(new Message(MessageType.BUS_RDX, address, controller.getID(), data));
+            System.out.println("Write Miss: Sending bus message");
+            // block is dirty then
         }
-        // Write Miss
-        // BusRdX
-        // If no valid copies - fetched from memory + set to dirty
-        // If valid copies, send copy then invalidate their copy and wb if they were dirty
-        controller.sendMessage(new Message(MessageType.BUS_RDX, address, controller.getID(), data));
-        System.out.println("Write Miss: Sending bus message");
-        // block is dirty then
+
     }
 
     @Override
@@ -77,11 +77,11 @@ public class Dragon implements Protocol {
         // The requesting block is in Sc state if another cache provides us, otherwise it's in E
         // Check if we have the block
         CacheBlock block = cache.findBlock(address);
-        if(block != null) {
+        if (block != null) {
             DragonState state = (DragonState) block.getState();
             // Send data back to bus
             controller.sendMessage(new Message(MessageType.BUS_DATA, address, senderID, block.getData()));
-            switch(state) {
+            switch (state) {
             case DIRTY:
                 // Write back to main memory
                 controller.sendMessage(new Message(MessageType.BUS_WRITEBACK, address, controller.getID(), block.getData()));
@@ -102,7 +102,6 @@ public class Dragon implements Protocol {
             }
         }
         controller.sendMessage(new Message(MessageType.BUS_DATA, address, senderID, null));
-
     }
 
     @Override
@@ -112,7 +111,7 @@ public class Dragon implements Protocol {
         CacheBlock block = cache.findBlock(address);
 
         // This data indicates whether if the data is found or not
-        if(data == null || data.length == 0) {
+        if (data == null || data.length == 0) {
             // If data is not found in other caches
             block.setState(DragonState.EXCLUSIVE);
         } else {
@@ -142,12 +141,12 @@ public class Dragon implements Protocol {
     @Override
     public void receiveBusUpd(int address, int[] data, Cache cache, CacheController controller) {
         CacheBlock block = cache.findBlock(address);
-        if(block.isValid()) {
+        if (block.isValid()) {
             DragonState state = (DragonState) block.getState();
             switch (state) {
-                case EXCLUSIVE:
-                    System.out.println("Exclusive + BusUpd should not happen");
-                    break;
+            case EXCLUSIVE:
+                System.out.println("Exclusive + BusUpd should not happen");
+                break;
             case SHARED_CLEAN:
                 block.write(cache.findAddress(address).getBlockOffset(), data);
                 block.setState(DragonState.SHARED_MODIFIED);

@@ -1,6 +1,7 @@
 package cpu;
 
 import cache.Cache;
+import cache.CacheController;
 import timer.Timer;
 
 public class CPU {
@@ -16,10 +17,12 @@ public class CPU {
     private int DUMMY_DATA = 99;
     private Timer timer = new Timer();
     private int pid;
+    private CacheController controller;
 
-    public CPU(Cache cache, int pid) {
+    public CPU(Cache cache, int pid, CacheController controller) {
         this.cache = cache;
         this.pid = pid;
+        this.controller = controller;
     }
 
     public void executeInstruction(String instruction) {
@@ -42,32 +45,32 @@ public class CPU {
 
     private void processLoad(int address) {
         loadInstructions++;
-            boolean hit = cache.readToAddress(address);
-            if (!hit) {
-                cacheMisses++;
-                timer.addCycles(dramLatency);
-                this.idleCycles += dramLatency; // Add DRAM latency on cache miss
-            } else {
-                cacheHits++;
-                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
-            }
+//            boolean hit = cache.readToAddress(address);
+//            if (!hit) {
+//                cacheMisses++;
+//                timer.addCycles(dramLatency);
+//                this.idleCycles += dramLatency; // Add DRAM latency on cache miss
+//            } else {
+//                cacheHits++;
+//                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
+//            }
     }
 
     private void processStore(int address) {
          // Store instruction
             storeInstructions++;
-            int hit = cache.writeToAddress(address, DUMMY_DATA);
-            if (hit == 1 || hit == 2) {
-                cacheMisses++;
-                // Need to know if DRAM latency was called
-                if (hit == 2) {
-                    timer.addCycles(dramLatency);
-                    this.idleCycles += dramLatency;
-                }
-            } else {
-                cacheHits++; // Assuming store always hits the cache
-                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
-            }
+//            int hit = cache.writeToAddress(address, DUMMY_DATA);
+//            if (hit == 1 || hit == 2) {
+//                cacheMisses++;
+//                // Need to know if DRAM latency was called
+//                if (hit == 2) {
+//                    timer.addCycles(dramLatency);
+//                    this.idleCycles += dramLatency;
+//                }
+//            } else {
+//                cacheHits++; // Assuming store always hits the cache
+//                this.idleCycles += cacheHitLatency; // Only add 1 cycle on cache hit
+//            }
     }
 
     private void processCompute(int address) {

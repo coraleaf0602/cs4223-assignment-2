@@ -1,20 +1,29 @@
 package cache;
 
+import protocol.*;
+
 import java.util.LinkedList;
 
 public class CacheSet {
     private LinkedList<CacheBlock> blocks;  // List of cache blocks in this set
     private int associativity;  // Number of blocks in this set (associativity)
-
     // Constructor
-    public CacheSet(int associativity, int blockSize) {
+    public CacheSet(int associativity, int blockSize, Protocol protocol) {
         System.out.println("Initialising Cache Set...");
         this.associativity = associativity;
         this.blocks = new LinkedList<>();
 
         // Initialize the cache blocks based on associativity
         for (int i = 0; i < this.associativity; i++) {
-            blocks.add(new CacheBlock(blockSize));
+            CacheState state = null;
+            if(protocol instanceof MESI) {
+               state = MESIState.INVALID;
+            } else if(protocol instanceof Dragon) {
+                state = DragonState.INVALID;
+            }
+            CacheBlock block = new CacheBlock(blockSize);
+            block.setState(state);
+            blocks.add(block);
         }
     }
     // Get a block by its tag

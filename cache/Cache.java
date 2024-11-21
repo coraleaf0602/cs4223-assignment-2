@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import bus.Bus;
 import memory.DRAM;
+import protocol.*;
 
 public class Cache {
     private final int MEMORY_SIZE_IN_BYTES = 32;
@@ -12,17 +13,12 @@ public class Cache {
     private int blockSize; // in bytes
     private int associativity;
     private int numberOfCacheSets;
-    // for the outputs
-    private DRAM dram;
-    private Bus bus;
 
-    public Cache(int cacheSize, int blockSize, int associativity, DRAM dram, Bus bus) {
+    public Cache(int cacheSize, int blockSize, int associativity, Protocol protocol) {
         // debug line
         System.out.println("Initialising Cache...");
 
         cache = new ArrayList<>();
-        this.dram = dram;
-        this.bus = bus;
         this.cacheSize = cacheSize;
         this.blockSize = blockSize;
         this.associativity = associativity;
@@ -32,7 +28,7 @@ public class Cache {
         this.numberOfCacheSets = this.cacheSize / (this.blockSize / this.associativity);
 
         for (int i = 0; i < numberOfCacheSets; i++) {
-            this.cache.add(new CacheSet(this.associativity, this.blockSize));
+            this.cache.add(new CacheSet(this.associativity, this.blockSize, protocol));
         }
     }
 
@@ -50,6 +46,7 @@ public class Cache {
 
         return new CacheAddress(blockNumber, blockOffset, setIndex, tag);
     }
+
 
 //    public boolean readToAddress(int address) {
 //        CacheAddress addressToRead = this.parseMemoryAddress(address);
@@ -114,6 +111,11 @@ public class Cache {
         CacheSet cacheSet = cache.get(addressToWrite.getSetIndex());
         // Search for the block with the given tag
         CacheBlock block = cacheSet.getBlockByTag(addressToWrite.getTag());
+
+        // Read/Write miss
+        if (block == null) {
+
+        }
 
         return block;
     }

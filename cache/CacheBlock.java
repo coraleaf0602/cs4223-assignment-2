@@ -14,7 +14,7 @@ public class CacheBlock {
     private final int DEFAULT_WORD_SIZE = 4;
 
     // Default constructor
-    public CacheBlock(CacheState state) {
+    public CacheBlock() {
         System.out.println("Initialising Cache Blocks");
         this.isValid = false;
         this.isDirty = false;
@@ -23,7 +23,7 @@ public class CacheBlock {
     }
 
     // Constructor that takes in Block size and state
-    public CacheBlock(int blockSize, CacheState state) {
+    public CacheBlock(int blockSize) {
         System.out.println("Initialising Cache Blocks of size " + blockSize + " bytes");
         this.isValid = false;
         this.isDirty = false;
@@ -32,8 +32,8 @@ public class CacheBlock {
     }
 
     // constructor with tag and data
-    public CacheBlock(int tag, int[] data, int blockSize, CacheState state) {
-        this(blockSize, state);
+    public CacheBlock(int tag, int[] data, int blockSize) {
+        this(blockSize);
         this.tag = tag;
         this.isValid = true;
         this.isDirty = false; // Assuming modified state upon write
