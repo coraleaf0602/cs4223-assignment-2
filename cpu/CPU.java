@@ -2,7 +2,7 @@ package cpu;
 
 import cache.Cache;
 import cache.CacheController;
-import timer.Timer;
+import timer.*;
 
 public class CPU {
     private Cache cache;

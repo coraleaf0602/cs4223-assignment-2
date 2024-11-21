@@ -1,14 +1,27 @@
 package protocol;
+
 import cache.*;
-import message.Message;
-import message.MessageType;
+import message.*;
 
 public class MOESI implements Protocol {
-    
+
     @Override
     public int[] readCache(CacheBlock block, int address, CacheController controller) {
+        MOESIState state = (MOESIState) block.getState(); // Cast to MESIState
         int[] data = null;
-        
+        switch (state) {
+            case MODIFIED:
+            case OWNER:
+            case EXCLUSIVE:
+            case SHARED:
+                // Return data directly from cache
+                data = block.getData();
+                break;
+            case INVALID:
+                // Issue a BusRd request to load the data
+                controller.sendMessage(new Message(MessageType.BUS_RD, address, controller.getID()));
+                break;
+        }
         return data;
     }
 

@@ -14,7 +14,7 @@ public class Bus {
     private ArrayList<Integer> invalidateMessages = new ArrayList<>();
     private int numberOfInvalidations = 0;
     private int dataTraffic = 0; // Bytes transferred on the bus
-    private DRAM dram;
+    public DRAM dram;
 
     public Bus(DRAM dram) {
         this.dram = dram;

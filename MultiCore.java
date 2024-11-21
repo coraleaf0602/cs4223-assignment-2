@@ -29,6 +29,16 @@ public class MultiCore {
         for (String s : args) {
             System.out.println(s);
         }
+
+
+        // this is just for debugging 
+        if (args.length==0){
+            protocolString = "MESI";
+            cacheSize = 4096; // Default cache size
+            associativity = 2;
+            blockSize = 32;
+        }
+
         // Types of instructions
         if (args.length == 5) {
             protocolString = args[0];
@@ -48,8 +58,9 @@ public class MultiCore {
         }
 
         for(int i = 0; i < numOfCores; i++) {
-            caches[i] = new Cache(cacheSize, blockSize, associativity, protocol, i);
-            controllers[i] = new CacheController(caches[i], bus, protocol, i, dram);
+            // caches[i] = new Cache(cacheSize, blockSize, associativity, protocol, i);
+            caches[i] = new Cache(cacheSize, blockSize, associativity, protocol);
+            controllers[i] = new CacheController(caches[i], bus, protocol, i, bus.dram);
             cpus[i] = new CPU(caches[i], i, controllers[i]);
             bus.registerCache(controllers[i]);
         }
